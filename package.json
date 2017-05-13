@@ -1,0 +1,32 @@
+{
+  "name": "@studioelsa/init-module",
+  "description": "an opinionated npm init-module",
+  "version": "0.0.0",
+  "author": "Jack Boberg <hello@jackboberg.info> (http://jackboberg.info/)",
+  "bugs": {
+    "url": "https://github.com/studio-elsa/init-module/issues"
+  },
+  "homepage": "https://github.com/studio-elsa/init-module#readme",
+  "keywords": [
+    "helper",
+    "init",
+    "init-module",
+    "module",
+    "npm",
+    "npm-init",
+    "package",
+    "package.json",
+    "prompt",
+    "start",
+    "wizard"
+  ],
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studio-elsa/init-module.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
