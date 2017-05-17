@@ -1,18 +1,15 @@
-const fs = require('fs')
+const { readdir } = require('fs')
 
-module.exports = ({ basename, dirname, prompt, yes }) => (cb) => {
-  fs.readdir(dirname, (er, f) => {
-    if (er) f = []
+module.exports = ({ basename, dirname, prompt, yes }) => (done) => {
+  readdir(dirname, (er, files) => {
+    if (er) files = []
 
-    f = f.filter((f) => f.match(/\.js$/))
+    const defaults = ['index.js', 'main.js', `${basename}.js`]
+    let jsFiles = files.filter((f) => f.match(/\.js$/))
+    let main = defaults.find((f) => jsFiles.includes(f))
 
-    if (f.indexOf('index.js') !== -1) f = 'index.js'
-    else if (f.indexOf('main.js') !== -1) f = 'main.js'
-    else if (f.indexOf(basename + '.js') !== -1) f = basename + '.js'
-    else f = f[0]
+    main = main || jsFiles[0] || 'index.js'
 
-    const index = f || 'index.js'
-
-    return cb(null, yes ? index : prompt('entry point', index))
+    return done(null, yes ? main : prompt('entry point', main))
   })
 }
