@@ -1,13 +1,12 @@
 const fs = require('fs')
 const path = require('path')
 
-// more popular packages should go here, maybe?
-const isTestPkg = (p) => {
-  return !!p.match(/^(expresso|mocha|tap|coffee-script|coco|streamline)$/)
+const configGetter = exports.configGetter = (config) => (name) => {
+  return config.get(name) || config.get(name.split('.').join('-'))
 }
 
-module.exports = (config, dirname, test, excluded) => (cb) => {
-  const conf = (name) => config.get(name) || config.get(name.split('.').join('-'))
+exports.readDeps = (config, dirname, test, excluded) => (cb) => {
+  const conf = configGetter(config)
 
   fs.readdir('node_modules', (er, dir) => {
     if (er) return cb()
@@ -45,4 +44,9 @@ module.exports = (config, dirname, test, excluded) => (cb) => {
       })
     })
   })
+}
+
+// more popular packages should go here, maybe?
+const isTestPkg = (p) => {
+  return !!p.match(/^(expresso|mocha|tap|coffee-script|coco|streamline)$/)
 }

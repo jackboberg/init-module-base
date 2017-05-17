@@ -1,4 +1,5 @@
 const semver = require('semver')
+const { configGetter } = require('../lib')
 
 const validate = (data) => {
   if (semver.valid(data)) return data
@@ -10,7 +11,7 @@ const validate = (data) => {
 }
 
 module.exports = ({ config, package: pkg, prompt, yes }) => {
-  const conf = (name) => config.get(name) || config.get(name.split('.').join('-'))
+  const conf = configGetter(config)
   const version = pkg.version || conf('init.version') || '1.0.0'
 
   return yes ? version : prompt('version', version, validate)

@@ -1,5 +1,7 @@
+const { configGetter } = require('../lib')
+
 module.exports = ({ config, prompt, yes }) => {
-  const conf = (name) => config.get(name) || config.get(name.split('.').join('-'))
+  const conf = configGetter(config)
   const a = conf('init.author.name')
 
   return a

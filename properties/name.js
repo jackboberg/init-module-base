@@ -1,5 +1,6 @@
 const npa = require('npm-package-arg')
 const validateName = require('validate-npm-package-name')
+const { configGetter } = require('../lib')
 
 const niceName = (n) => n.replace(/^node-|[.-]js$/g, '').toLowerCase()
 
@@ -16,8 +17,9 @@ const validate = (data) => {
 }
 
 module.exports = ({ basename, config, package: pkg, prompt, yes }) => {
+  const conf = configGetter(config)
   let name = pkg.name || basename
-  let scope = config.get('scope')
+  let scope = conf('scope')
 
   if (scope) {
     const spec = npa(name)

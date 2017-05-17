@@ -1,4 +1,5 @@
 const validateLicense = require('validate-npm-package-license')
+const { configGetter } = require('../lib')
 
 const validate = (data) => {
   const its = validateLicense(data)
@@ -13,7 +14,7 @@ const validate = (data) => {
 }
 
 module.exports = ({ config, package: pkg, prompt, yes }) => {
-  const conf = (name) => config.get(name) || config.get(name.split('.').join('-'))
+  const conf = configGetter(config)
   const license = pkg.license || conf('init.license') || 'ISC'
 
   return yes ? license : prompt('license', license, validate)
