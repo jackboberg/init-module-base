@@ -1,7 +1,10 @@
-module.exports = ({ prompt, yes }) => yes ? '' : prompt('keywords', (s) => {
-  if (!s) return undefined
-  if (Array.isArray(s)) s = s.join(' ')
-  if (typeof s !== 'string') return s
+module.exports = ({ prompt, yes }) => yes ? '' : prompt('keywords', validate)
 
-  return s.split(/[\s,]+/)
-})
+const validate = (input) => {
+  if (!input) return undefined
+
+  if (Array.isArray(input)) input = input.join(' ')
+  if (typeof input !== 'string') return input
+
+  return input.split(/[\s,]+/)
+}
