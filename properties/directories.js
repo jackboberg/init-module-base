@@ -1,25 +1,24 @@
-const fs = require('fs')
+const { readdir } = require('fs')
 
-module.exports = ({ dirname }) => (cb) => {
-  fs.readdir(dirname, (er, dirs) => {
-    if (er) return cb(er)
+module.exports = ({ dirname }) => (done) => {
+  readdir(dirname, (er, dirs) => {
+    if (er) return done(er)
 
-    let res = {}
+    let directories = dirs.reduce(addDirectory, {})
+    if (Object.keys(directories).length === 0) directories = undefined
 
-    dirs.forEach((d) => {
-      switch (d) {
-        /* eslint-disable no-return-assign */
-        case 'example': case 'examples': return res.example = d
-        case 'test': case 'tests': return res.test = d
-        case 'doc': case 'docs': return res.doc = d
-        case 'man': return res.man = d
-        case 'lib': return res.lib = d
-        /* eslint-enable no-return-assign */
-      }
-    })
-
-    if (Object.keys(res).length === 0) res = undefined
-
-    return cb(null, res)
+    return done(null, directories)
   })
+}
+
+const addDirectory = (acc, dir) => {
+  switch (dir) {
+    case 'example': case 'examples': return Object.assign(acc, { example: dir })
+    case 'test': case 'tests': return Object.assign(acc, { test: dir })
+    case 'doc': case 'docs': return Object.assign(acc, { doc: dir })
+    case 'man': return Object.assign(acc, { man: dir })
+    case 'lib': return Object.assign(acc, { lib: dir })
+  }
+
+  return acc
 }
