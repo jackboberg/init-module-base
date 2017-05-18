@@ -1,36 +1,37 @@
-const fs = require('fs')
-const path = require('path')
+const { readdir } = require('fs')
+const { join } = require('path')
 
-module.exports = ({ dirname, package: pkg, prompt, yes }) => (cb) => {
-  // MUST have a test script!
-  const s = pkg.scripts || {}
-  const notest = 'echo "Error: no test specified" && exit 1'
+const notest = 'echo "Error: no test specified" && exit 1'
 
-  const setupScripts = (d, cb) => {
-    // check to see what framework is in use, if any
-    const tx = (test) => test || notest
+module.exports = (state) => (done) => {
+  const { dirname, package: { scripts = {} }, prompt, yes } = state
 
-    if (!s.test || s.test === notest) {
-      const ps = 'test command'
-      const commands = {
-        'tap': 'tap test/*.js',
-        'expresso': 'expresso test',
-        'mocha': 'mocha'
+  readdir(join(dirname, 'node_modules'), (er, modules = []) => {
+    // MUST have a test script!
+    if (!scripts.test || scripts.test === notest) {
+      const test = getTestScript(modules)
+
+      if (yes) scripts.test = test || notest
+      else {
+        const ps = 'test command'
+        scripts.test = test ? prompt(ps, test, validate) : prompt(ps, validate)
       }
-      let command
-
-      Object.keys(commands).forEach((k) => {
-        if (d.indexOf(k) !== -1) command = commands[k]
-      })
-
-      if (yes) s.test = command || notest
-      else s.test = command ? prompt(ps, command, tx) : prompt(ps, tx)
     }
 
-    return cb(null, s)
-  }
-
-  fs.readdir(path.join(dirname, 'node_modules'), (er, d) => {
-    setupScripts(d || [], cb)
+    return done(null, scripts)
   })
 }
+
+const getTestScript = (modules) => {
+  // check to see what framework is in use, if any
+  const scripts = {
+    'tap': 'tap test/*.js',
+    'expresso': 'expresso test',
+    'mocha': 'mocha'
+  }
+  const module = Object.keys(scripts).find((m) => modules.includes(m))
+
+  return scripts[module]
+}
+
+const validate = (input) => input || notest
