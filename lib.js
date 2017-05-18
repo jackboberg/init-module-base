@@ -1,52 +1,47 @@
-const fs = require('fs')
-const path = require('path')
+const Series = require('run-series')
+const { readdir } = require('fs')
+const { join } = require('path')
+const { readFile } = require('jsonfile')
 
 const configGetter = exports.configGetter = (config) => (name) => {
   return config.get(name) || config.get(name.split('.').join('-'))
 }
 
-exports.readDeps = (config, dirname, test, excluded) => (cb) => {
+exports.readDeps = (config, dirname, dev, excluded) => (done) => {
   const conf = configGetter(config)
 
-  fs.readdir('node_modules', (er, dir) => {
-    if (er) return cb()
+  readdir('node_modules', (er, modules) => {
+    if (er) return done()
 
-    const deps = {}
-    let n = dir.length
+    const tasks = modules.map((module) => (next) => {
+      if (module.match(/^\./)) return next()
+      if (dev !== isDevPkg(module) || excluded[module]) return next()
 
-    if (n === 0) return cb(null, deps)
+      const path = join(dirname, 'node_modules', module, 'package.json')
 
-    const next = () => {
-      if (--n === 0) return cb(null, deps)
-    }
+      readFile(path, 'utf8', (er, pkg) => {
+        if (er || !shouldInclude(pkg)) return next()
 
-    dir.forEach((d) => {
-      if (d.match(/^\./)) return next()
-      if (test !== isTestPkg(d) || excluded[d]) return next()
+        const version = conf('save.exact')
+          ? pkg.version
+          : conf('save.prefix') + pkg.version
 
-      const dp = path.join(dirname, 'node_modules', d, 'package.json')
-
-      fs.readFile(dp, 'utf8', (er, p) => {
-        if (er) return next()
-
-        try { p = JSON.parse(p) } catch (e) { return next() }
-
-        if (!p.version) return next()
-        if (p._requiredBy) {
-          if (!p._requiredBy.some((req) => req === '#USER')) return next()
-        }
-
-        deps[d] = conf('save.exact')
-          ? p.version
-          : conf('save.prefix') + p.version
-
-        return next()
+        return next(null, { [module]: version })
       })
     })
+
+    Series(tasks, (er, results) => done(er, Object.assign({}, ...results)))
   })
 }
 
+const shouldInclude = (pkg) => {
+  if (!pkg.version) return false
+  if (pkg._requiredBy) return pkg._requiredBy.some((req) => req === '#USER')
+
+  return true
+}
+
 // more popular packages should go here, maybe?
-const isTestPkg = (p) => {
+const isDevPkg = (p) => {
   return !!p.match(/^(expresso|mocha|tap|coffee-script|coco|streamline)$/)
 }
