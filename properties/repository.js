@@ -1,8 +1,8 @@
-const fs = require('fs')
+const { readFile } = require('fs')
 
-module.exports = ({ yes, prompt }) => (cb) => {
-  fs.readFile('.git/config', 'utf8', (er, gconf) => {
-    if (er || !gconf) return cb(null, yes ? '' : prompt('git repository'))
+module.exports = ({ yes, prompt }) => (done) => {
+  readFile('.git/config', 'utf8', (er, gconf) => {
+    if (er || !gconf) return done(null, yes ? '' : prompt('git repository'))
 
     gconf = gconf.split(/\r?\n/)
     const i = gconf.indexOf('[remote "origin"]')
@@ -19,6 +19,6 @@ module.exports = ({ yes, prompt }) => (cb) => {
       u = u.replace(/^git@github.com:/, 'https://github.com/')
     }
 
-    return cb(null, yes ? u : prompt('git repository', u))
+    return done(null, yes ? u : prompt('git repository', u))
   })
 }

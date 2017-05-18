@@ -1,14 +1,12 @@
-module.exports = ({ config, prompt, yes }) => {
-  const conf = (name) => config.get(name) || config.get(name.split('.').join('-'))
-  const a = conf('init.author.name')
+const { configGetter } = require('../lib')
 
-  return a
-    ? {
-      'name': a,
-      'email': conf('init.author.email'),
-      'url': conf('init.author.url')
-    }
-    : yes
-      ? ''
-      : prompt('author')
+module.exports = ({ config, prompt, yes }) => {
+  const conf = configGetter(config)
+  const name = conf('init.author.name')
+  const email = conf('init.author.email')
+  const url = conf('init.author.url')
+
+  if (name) return { name, email, url }
+
+  return yes ? '' : prompt('author')
 }

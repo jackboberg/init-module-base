@@ -1,12 +1,12 @@
-const fs = require('fs')
-const path = require('path')
+const { readdir } = require('fs')
+const { resolve } = require('path')
 
-module.exports = ({ dirname }) => (cb) => {
-  fs.readdir(path.resolve(dirname, 'bin'), (er, d) => {
+module.exports = ({ dirname }) => (done) => {
+  readdir(resolve(dirname, 'bin'), (er, dir) => {
     // no bins
-    if (er) return cb()
+    if (er) return done()
 
     // just take the first js file we find there, or nada
-    return cb(null, d.filter((f) => f.match(/\.js$/))[0])
+    return done(null, dir.filter((f) => f.match(/\.js$/))[0])
   })
 }
