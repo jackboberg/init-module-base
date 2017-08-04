@@ -1,5 +1,7 @@
 # init-module
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/jackboberg/init-module-base.svg)](https://greenkeeper.io/)
+
 [![standard][standard-image]][standard-url]
 
 > forkable base for creating a npm init-module
